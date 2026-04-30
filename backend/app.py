@@ -20,9 +20,9 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*", "send_wildcard": True, "max_age": 3600}})
 
 # Configuration
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
-app.config['DATABASE'] = 'db/metadata.db'
+app.config['DATABASE'] = os.getenv('DATABASE_PATH', 'db/metadata.db')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TIMEOUT'] = 300  # 5 minutes timeout
 app.config['MAX_CONTENT_PATH'] = None  # Allow large uploads
@@ -106,6 +106,8 @@ def health():
 
 
 if __name__ == '__main__':
-    print("[INFO] Starting SKA Backend server on port 5000...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_DEBUG', 'False') == 'True'
+    print(f"[INFO] Starting SKA Backend server on port {port}...")
+    app.run(debug=debug, host='0.0.0.0', port=port)
 

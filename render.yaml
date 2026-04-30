@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ska-backend
+    env: docker
+    plan: free
+    dockerfile: ./Dockerfile
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: false
+      - key: PORT
+        value: 8000

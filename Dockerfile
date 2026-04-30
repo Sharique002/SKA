@@ -2,35 +2,30 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    curl \
-    nodejs \
-    npm \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm install
+# Copy backend only
+COPY backend backend/
+COPY db db/
+COPY uploads uploads/
 
-COPY backend/ ./backend/
-COPY frontend/ ./frontend/
-
+# Create necessary directories
 RUN mkdir -p uploads db
 
-EXPOSE 5000 3000
+# Expose port
+EXPOSE 8000
 
-RUN echo '#!/bin/bash\n\
-set -e\n\
-cd /app\n\
-python -m flask --app backend.app run --host 0.0.0.0 --port 5000 --no-debugger --no-reload &\n\
-cd /app/frontend\n\
-npm run dev -- --host 0.0.0.0\n\
-' > /app/start.sh && chmod +x /app/start.sh
+# Set environment variables
+ENV FLASK_ENV=production
+ENV FLASK_DEBUG=false
+ENV PORT=8000
 
-ENV PYTHONUNBUFFERED=1
-ENV FLASK_ENV=development
-
-CMD ["/app/start.sh"]
+# Run application with gunicorn
+CMD exec gunicorn --workers 2 --worker-class sync --timeout 120 --bind 0.0.0.0:$PORT backend.app:app

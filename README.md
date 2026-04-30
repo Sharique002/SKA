@@ -17,7 +17,6 @@ The project has two main parts:
 - View sources and confidence scores
 - Manage uploaded documents
 - View system statistics
-- One-command Windows startup script
 
 ## Tech Stack
 
@@ -45,23 +44,20 @@ Frontend:
 
 ```text
 ska_project/
-├── backend/
+├── backend/              # Flask backend API
 │   ├── app.py
 │   ├── models/
 │   ├── routes/
 │   └── services/
-├── frontend/
+├── frontend/             # React + Vite frontend
 │   ├── src/
 │   ├── package.json
 │   └── vite.config.js
 ├── requirements.txt
-├── run.ps1
-├── start.bat
-├── Dockerfile
 └── README.md
 ```
 
-Runtime folders such as `uploads/`, `db/`, `backend/db/`, `venv/`, `frontend/node_modules/`, and `frontend/dist/` are ignored by Git.
+Runtime folders such as `uploads/`, `db/`, `venv/`, `frontend/node_modules/` are ignored by Git.
 
 ## Prerequisites
 
@@ -74,79 +70,33 @@ Install these before running the project:
 
 The first backend run may download embedding model files, so it can take longer than later runs.
 
-## Quick Start on Windows
+## Quick Deploy
 
-From the project folder:
+**Vercel (Frontend)**: https://vercel.com/new → Select repo → Root: `frontend` → Deploy
 
-```powershell
-cd D:\files\OneDrive\Desktop\SKA_01\ska_project
-.\start.bat
-```
+**Render (Backend)**: https://render.com/new → Select repo → Root: `ska_project` → Deploy
 
-You can also double-click `start.bat`.
-
-The script checks dependencies, installs missing project dependencies when needed, starts the backend and frontend, and keeps both running until you press `Ctrl+C`.
-
-Open:
-
-```text
-http://127.0.0.1:3000/
-```
-
-Backend health check:
-
-```text
-http://127.0.0.1:5000/api/health
-```
-
-## Start with PowerShell
-
-```powershell
-cd D:\files\OneDrive\Desktop\SKA_01\ska_project
-powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
-```
-
-Check dependencies without starting the servers:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1 -CheckOnly
-```
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
 
 ## Manual Setup
 
-Use this if you prefer running backend and frontend separately.
+Use this to run backend and frontend separately in two terminals.
 
-### 1. Backend Setup
+### Windows
+
+**Terminal 1: Start Backend**
 
 ```powershell
 cd D:\files\OneDrive\Desktop\SKA_01\ska_project
 python -m venv venv
 .\venv\Scripts\activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
+python backend/app.py
 ```
 
-Start the backend:
+Backend runs at: `http://127.0.0.1:5000`
 
-```powershell
-python -m flask --app backend.app run --host 0.0.0.0 --port 5000 --no-debugger --no-reload
-```
-
-Backend URL:
-
-```text
-http://127.0.0.1:5000
-```
-
-Health check:
-
-```text
-http://127.0.0.1:5000/api/health
-```
-
-### 2. Frontend Setup
-
-Open a second terminal:
+**Terminal 2: Start Frontend**
 
 ```powershell
 cd D:\files\OneDrive\Desktop\SKA_01\ska_project\frontend
@@ -154,26 +104,23 @@ npm install
 npm run dev
 ```
 
-Frontend URL:
+Frontend runs at: `http://127.0.0.1:3000`
 
-```text
-http://127.0.0.1:3000/
-```
+### macOS / Linux
 
-The Vite dev server proxies `/api` requests to the Flask backend at `http://localhost:5000`.
-
-## Manual Setup on macOS or Linux
+**Terminal 1: Start Backend**
 
 ```bash
 cd ska_project
 python3 -m venv venv
 source venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m flask --app backend.app run --host 0.0.0.0 --port 5000 --no-debugger --no-reload
+pip install -r requirements.txt
+python backend/app.py
 ```
 
-In another terminal:
+Backend runs at: `http://127.0.0.1:5000`
+
+**Terminal 2: Start Frontend**
 
 ```bash
 cd ska_project/frontend
@@ -181,7 +128,7 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000/`.
+Frontend runs at: `http://127.0.0.1:3000`
 
 ## API Endpoints
 
@@ -213,37 +160,17 @@ Admin:
 - Text: `.txt`
 - Markdown: `.md`
 
-## Build the Frontend
+## Build Frontend for Production
 
 ```powershell
 cd frontend
 npm run build
 ```
 
-Preview the production build:
+Preview production build:
 
 ```powershell
 npm run preview
-```
-
-## Docker Development Run
-
-Build:
-
-```powershell
-docker build -t ska .
-```
-
-Run:
-
-```powershell
-docker run --rm -p 5000:5000 -p 3000:3000 ska
-```
-
-Open:
-
-```text
-http://127.0.0.1:3000/
 ```
 
 ## Troubleshooting
@@ -253,12 +180,6 @@ If the frontend says the backend is offline, make sure the backend is running on
 If port `3000` is already in use, stop the other process or change the frontend port in `frontend/vite.config.js`.
 
 If port `5000` is already in use, stop the other process or start Flask on another port and update the proxy target in `frontend/vite.config.js`.
-
-If Python commands fail on Windows, run the app with:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
-```
 
 If dependencies are missing, rerun:
 
