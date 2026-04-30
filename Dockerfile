@@ -13,10 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend only
 COPY backend backend/
-COPY db db/
-COPY uploads uploads/
 
-# Create necessary directories
+# Create necessary directories (will be empty on first run)
 RUN mkdir -p uploads db
 
 # Expose port
