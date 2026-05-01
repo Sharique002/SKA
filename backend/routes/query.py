@@ -12,10 +12,6 @@ from flask import Blueprint, request, jsonify, current_app
 backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
-from services.embeddings import generate_embeddings
-from services.vectordb import search_similar
-from services.rag import generate_answer
-
 query_bp = Blueprint('query', __name__)
 
 
@@ -54,6 +50,7 @@ def query_knowledge():
         try:
             # Step 1: Generate embedding for the query
             print(f"[INFO] Generating embedding for query...")
+            from services.embeddings import generate_embeddings
             query_embeddings = generate_embeddings([query_text])
 
             if not query_embeddings or len(query_embeddings) == 0:
@@ -77,7 +74,8 @@ def query_knowledge():
         try:
             # Step 2: Search for similar chunks
             print(f"[INFO] Searching for similar chunks...")
-            similar_chunks = search_similar(query_embedding, top_k=top_k, filter_docs=filter_docs)
+            from services.vectordb import search_similar
+            similar_chunks = search_similar(query_embedding, top_k=top_k, filter_docs=filter_docs, db_path=current_app.config['DATABASE'])
             print(f"[INFO] Found {len(similar_chunks)} similar chunks")
 
         except Exception as e:
@@ -100,6 +98,7 @@ def query_knowledge():
         try:
             # Step 3: Generate answer using RAG
             print(f"[INFO] Generating answer from {len(similar_chunks)} chunks...")
+            from services.rag import generate_answer
             answer, confidence = generate_answer(query_text, similar_chunks)
             print(f"[INFO] Answer generated with confidence: {confidence:.2f}")
 
@@ -160,12 +159,14 @@ def search_documents():
             return jsonify({'error': 'No keywords provided'}), 400
         
         keywords = data['keywords']
-        
+
         # Generate embedding for keywords
+        from services.embeddings import generate_embeddings
         keyword_embedding = generate_embeddings([keywords])[0]
-        
+
         # Search for similar content
-        results = search_similar(keyword_embedding, top_k=10)
+        from services.vectordb import search_similar
+        results = search_similar(keyword_embedding, top_k=10, db_path=current_app.config['DATABASE'])
         
         # Group by document
         doc_results = {}

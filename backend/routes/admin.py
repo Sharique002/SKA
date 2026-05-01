@@ -12,8 +12,6 @@ from flask import Blueprint, jsonify, current_app
 backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
-from services.vectordb import delete_document_embeddings, get_vector_db_stats
-
 admin_bp = Blueprint('admin', __name__)
 
 
@@ -119,9 +117,10 @@ def delete_document(document_id):
             return jsonify({'error': 'Document not found'}), 404
         
         file_path = result[0]
-        
+
         # Delete from vector database
-        delete_document_embeddings(document_id)
+        from services.vectordb import delete_document_embeddings
+        delete_document_embeddings(document_id, current_app.config['DATABASE'])
         
         # Delete chunks from database
         cursor.execute('DELETE FROM chunks WHERE document_id = ?', (document_id,))
@@ -154,37 +153,34 @@ def get_system_stats():
     try:
         conn = sqlite3.connect(current_app.config['DATABASE'])
         cursor = conn.cursor()
-        
+
         # Count total documents
         cursor.execute('SELECT COUNT(*) FROM documents')
         total_docs = cursor.fetchone()[0]
-        
+
         # Count by status
         cursor.execute('SELECT status, COUNT(*) FROM documents GROUP BY status')
         status_counts = {row[0]: row[1] for row in cursor.fetchall()}
-        
+
         # Count total chunks
         cursor.execute('SELECT COUNT(*) FROM chunks')
         total_chunks = cursor.fetchone()[0]
-        
+
         # Get total storage used
         cursor.execute('SELECT SUM(file_size) FROM documents')
         total_size = cursor.fetchone()[0] or 0
-        
+
         conn.close()
-        
-        # Get vector DB stats
-        vector_stats = get_vector_db_stats()
-        
+
         return jsonify({
             'total_documents': total_docs,
             'status_breakdown': status_counts,
             'total_chunks': total_chunks,
             'total_storage_bytes': total_size,
             'total_storage_mb': round(total_size / (1024 * 1024), 2),
-            'vector_db': vector_stats
+            'vector_db': {'total_vectors': 0, 'dimension': 0, 'index_type': 'Not initialized'}
         }), 200
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -222,7 +218,7 @@ def clear_all_data():
         # Clear vector database (if implemented)
         try:
             from services.vectordb import clear_vector_db
-            clear_vector_db()
+            clear_vector_db(current_app.config['DATABASE'])
         except:
             pass
         

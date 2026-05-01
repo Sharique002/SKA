@@ -7,7 +7,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 import uuid
-import traceback
+
 
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
@@ -159,7 +159,7 @@ def upload_document():
             conn.close()
             
             # Store embeddings in vector database
-            store_embeddings(chunk_ids, embeddings, chunks, document_id)
+            store_embeddings(chunk_ids, embeddings, chunks, document_id, current_app.config['DATABASE'])
             
             print(f"[SUCCESS] Document processed successfully: ID={document_id}, chunks={len(chunks)}")
             

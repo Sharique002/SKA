@@ -27,8 +27,6 @@ backend/uploads/
 
 # Vector DB
 *.pkl
-db/faiss_index.pkl
-db/index_mapping.pkl
 
 # Logs
 *.log
@@ -46,15 +44,9 @@ db/index_mapping.pkl
 .DS_Store
 Thumbs.db
 
-# Streamlit
-.streamlit/
-
 # Model cache
 .cache/
 
 # Environment variables
 .env
 .env.local
-
-# Docker
-.dockerignore

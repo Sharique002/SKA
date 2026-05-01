@@ -86,38 +86,4 @@ def extract_from_docx(file_path: str) -> str:
         raise Exception(f"Error reading DOCX: {str(e)}")
 
 
-def extract_metadata(file_path: str, file_type: str) -> dict:
-    """
-    Extract metadata from files
-    
-    Returns:
-        Dictionary containing metadata like page count, author, etc.
-    """
-    metadata = {
-        'file_path': file_path,
-        'file_type': file_type,
-        'file_size': os.path.getsize(file_path)
-    }
-    
-    try:
-        if file_type == 'pdf':
-            import PyPDF2
-            with open(file_path, 'rb') as f:
-                pdf_reader = PyPDF2.PdfReader(f)
-                metadata['num_pages'] = len(pdf_reader.pages)
-                if pdf_reader.metadata:
-                    metadata['title'] = pdf_reader.metadata.get('/Title', '')
-                    metadata['author'] = pdf_reader.metadata.get('/Author', '')
-        
-        elif file_type == 'docx':
-            from docx import Document
-            doc = Document(file_path)
-            core_properties = doc.core_properties
-            metadata['author'] = core_properties.author or ''
-            metadata['title'] = core_properties.title or ''
-            metadata['num_paragraphs'] = len(doc.paragraphs)
-    
-    except Exception as e:
-        print(f"Warning: Could not extract metadata: {e}")
-    
-    return metadata
+

@@ -82,61 +82,6 @@ def generate_embeddings(texts: List[str]) -> List[np.ndarray]:
         raise Exception(f"Error generating embeddings: {str(e)}")
 
 
-def compute_similarity(embedding1: np.ndarray, embedding2: np.ndarray) -> float:
-    """
-    Compute cosine similarity between two embeddings
-    
-    Args:
-        embedding1: First embedding vector
-        embedding2: Second embedding vector
-    
-    Returns:
-        Similarity score between 0 and 1
-    """
-    try:
-        # Cosine similarity
-        dot_product = np.dot(embedding1, embedding2)
-        norm1 = np.linalg.norm(embedding1)
-        norm2 = np.linalg.norm(embedding2)
-        
-        if norm1 == 0 or norm2 == 0:
-            return 0.0
-        
-        similarity = dot_product / (norm1 * norm2)
-        
-        # Ensure it's between 0 and 1
-        similarity = max(0.0, min(1.0, similarity))
-        
-        return float(similarity)
-    
-    except Exception as e:
-        raise Exception(f"Error computing similarity: {str(e)}")
-
-
-def batch_generate_embeddings(texts: List[str], batch_size: int = 32) -> List[np.ndarray]:
-    """
-    Generate embeddings in batches for large datasets
-    
-    Args:
-        texts: List of texts to embed
-        batch_size: Number of texts to process at once
-    
-    Returns:
-        List of embeddings
-    """
-    if not texts:
-        return []
-    
-    all_embeddings = []
-    
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
-        embeddings = generate_embeddings(batch)
-        all_embeddings.extend(embeddings)
-    
-    return all_embeddings
-
-
 def get_embedding_dimension() -> int:
     """
     Get the dimension of the embedding vectors

@@ -63,9 +63,20 @@ def init_database():
             content TEXT NOT NULL,
             chunk_index INTEGER NOT NULL,
             metadata TEXT,
+            embedding BLOB,
             FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
         )
     ''')
+
+    # Add embedding column to existing chunks table if it doesn't exist
+    try:
+        cursor.execute('PRAGMA table_info(chunks)')
+        columns = [row[1] for row in cursor.fetchall()]
+        if 'embedding' not in columns:
+            cursor.execute('ALTER TABLE chunks ADD COLUMN embedding BLOB')
+            print("[INFO] Added embedding column to chunks table")
+    except Exception as e:
+        print(f"[WARN] Could not update chunks table: {e}")
 
     conn.commit()
     conn.close()

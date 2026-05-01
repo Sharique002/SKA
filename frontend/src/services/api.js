@@ -1,6 +1,19 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+// Determine API base URL based on environment
+let API_BASE_URL = 'http://localhost:5000/api'
+
+// If running in development with vite, use the proxy
+if (import.meta.env.DEV) {
+  API_BASE_URL = '/api'
+}
+
+// Override with environment variable if set
+if (import.meta.env.VITE_API_URL) {
+  API_BASE_URL = import.meta.env.VITE_API_URL
+}
+
+console.log('[API] Base URL:', API_BASE_URL)
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -1,0 +1,24 @@
+services:
+  backend:
+    image: ska-backend
+    container_name: ska-backend
+    ports:
+      - "5000:8000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=false
+      - PORT=8000
+    volumes:
+      - ./backend:/app/backend
+      - ./uploads:/app/uploads
+      - ./db:/app/db
+    restart: unless-stopped
+
+  frontend:
+    image: ska-frontend
+    container_name: ska-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
